@@ -26,6 +26,9 @@ Vital
 * Added the data_serializer base algorithm to support serilization
   of Vital types for distributed processing and other uses.
 
+ * Added iterator, const_iterator and iterable classes to support container-
+   independent iteration.
+
 Vital Bindings
 
  * Added python bindings for timestamp class.
