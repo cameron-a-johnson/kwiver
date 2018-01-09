@@ -1,5 +1,5 @@
 /*ckwg +29
- * Copyright 2013-2017 by Kitware, Inc.
+ * Copyright 2018 by Kitware, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *    to endorse or promote products derived from this software without specific
  *    prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR
@@ -28,80 +28,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tool_io.h"
+#ifndef KWIVER_TOOLS_KWIVER_APPLET_H
+#define KWIVER_TOOLS_KWIVER_APPLET_H
 
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
+#include "kwiver_tools_export.h"
 
-namespace sprokit {
+#include <ostream>
 
-namespace {
+namespace kwiver {
+namespace tools {
 
-static kwiver::vital::path_t const iostream_path = kwiver::vital::path_t("-");
+// forward type definition
+class applet_context;
 
-}
-
-static void std_stream_dtor(void* ptr);
-
-
-// ------------------------------------------------------------------
-istream_t
-open_istream(kwiver::vital::path_t const& path)
+/**
+ * @brief Abstract base class for all kwiver tools.
+ */
+class KWIVER_TOOLS_EXPORT kwiver_applet
 {
-  istream_t istr;
+public:
+  kwiver_applet();
+  virtual ~kwiver_applet() = default;
 
-  if (path == iostream_path)
-  {
-    istr.reset(&std::cin, &std_stream_dtor);
-  }
-  else
-  {
-    istr.reset(new std::ifstream(path));
+  void initialize( kwiver::tools::applet_context* ctxt);
 
-    if (!istr->good())
-    {
-      std::string const reason = "Unable to open input file: " + path;
+  virtual int run( int argc, const char* argv[] ) = 0;
+  virtual void usage( std::ostream& outstream ) const = 0;
 
-      throw std::runtime_error(reason);
-    }
-  }
+protected:
 
-  return istr;
-}
+  /**
+   * @brief Get reference to current output stream
+   *
+   * This method returns the current output stream, that has been
+   * setup by the app_runner.
+   *
+   * @return Current output stream.
+   */
+  std::ostream& outstream() const;
+  const std::string& applet_name() const;
 
+private:
+  kwiver::tools::applet_context* m_context;
+};
 
-// ------------------------------------------------------------------
-ostream_t
-open_ostream(kwiver::vital::path_t const& path)
-{
-  ostream_t ostr;
+} } // end namespace
 
-  if (path == iostream_path)
-  {
-    ostr.reset(&std::cout, &std_stream_dtor);
-  }
-  else
-  {
-    ostr.reset(new std::ofstream(path));
+// ==================================================================
+// Support for adding factories
 
-    if (!ostr->good())
-    {
-      std::string const reason = "Unable to open output file: " + path;
+#define ADD_APPLET( applet_T)                               \
+  add_factory( new kwiver::vital::plugin_factory_0< applet_T >( typeid( kwiver::tools::kwiver_applet ).name() ) )
 
-      throw std::runtime_error(reason);
-    }
-  }
-
-  return ostr;
-}
-
-
-// ------------------------------------------------------------------
-void
-std_stream_dtor(void* /*ptr*/)
-{
-  // We don't want to delete std::cin or std::cout.
-}
-
-} // end namespace
+#endif /* KWIVER_TOOLS_KWIVER_APPLET_H */

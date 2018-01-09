@@ -1,5 +1,5 @@
 /*ckwg +29
- * Copyright 2013-2017 by Kitware, Inc.
+ * Copyright 2018 by Kitware, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *    to endorse or promote products derived from this software without specific
  *    prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR
@@ -28,80 +28,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "tool_io.h"
+#ifndef KWIVER_TOOLS_APP_CONTEXT_H
+#define KWIVER_TOOLS_APP_CONTEXT_H
 
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
+#include <vital/util/wrap_text_block.h>
 
-namespace sprokit {
+#include <memory>
+#include <ostream>
 
-namespace {
+namespace kwiver {
+namespace tools {
 
-static kwiver::vital::path_t const iostream_path = kwiver::vital::path_t("-");
-
-}
-
-static void std_stream_dtor(void* ptr);
-
-
-// ------------------------------------------------------------------
-istream_t
-open_istream(kwiver::vital::path_t const& path)
+// ----------------------------------------------------------------
+/**
+ * @brief Applet context provided by the tool runner.
+ *
+ */
+class applet_context
 {
-  istream_t istr;
+public:
 
-  if (path == iostream_path)
-  {
-    istr.reset(&std::cin, &std_stream_dtor);
-  }
-  else
-  {
-    istr.reset(new std::ifstream(path));
+  // current output stream set by tool runner
+  std::shared_ptr<std::ostream> m_ostream;
 
-    if (!istr->good())
-    {
-      std::string const reason = "Unable to open input file: " + path;
+  // Used to wrap large text blocks
+  kwiver::vital::wrap_text_block m_wtb;
 
-      throw std::runtime_error(reason);
-    }
-  }
+  // name of the applet. as in kwiver <applet> <args..>
+  std::string m_applet_name;
+  }; // end class applet_context
 
-  return istr;
-}
+} } // end namespace
 
 
-// ------------------------------------------------------------------
-ostream_t
-open_ostream(kwiver::vital::path_t const& path)
-{
-  ostream_t ostr;
-
-  if (path == iostream_path)
-  {
-    ostr.reset(&std::cout, &std_stream_dtor);
-  }
-  else
-  {
-    ostr.reset(new std::ofstream(path));
-
-    if (!ostr->good())
-    {
-      std::string const reason = "Unable to open output file: " + path;
-
-      throw std::runtime_error(reason);
-    }
-  }
-
-  return ostr;
-}
-
-
-// ------------------------------------------------------------------
-void
-std_stream_dtor(void* /*ptr*/)
-{
-  // We don't want to delete std::cin or std::cout.
-}
-
-} // end namespace
+#endif /* KWIVER_TOOLS_APP_CONTEXT_H */

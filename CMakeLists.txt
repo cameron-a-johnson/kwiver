@@ -297,6 +297,10 @@ if (KWIVER_ENABLE_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
+if (KWIVER_ENABLE_TOOLS)
+  add_subdirectory(tools)
+endif()
+
 ###
 # include as the last subdir
 add_subdirectory( vital )
