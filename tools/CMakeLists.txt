@@ -2,6 +2,16 @@
 # CMake file for the vital tools
 #
 
+set( sources
+  register_tools.cxx
+
+  config_explorer.cxx
+  )
+
+set( headers
+  config_explorer.h
+  )
+
 ###
 # Add our plugin path to the default list
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
@@ -13,7 +23,7 @@ kwiver_add_module_path( ${kwiver_module_path_result} )
 
 ###
 #
-kwiver_add_library( kwiver_tools
+kwiver_add_library( kwiver_tools_applet
                kwiver_applet.h
                kwiver_applet.cxx
 )
@@ -29,19 +39,18 @@ target_link_libraries( kwiver
                  vital_vpm
                  vital_logger
                  kwiversys
-                 kwiver_tools
+                 kwiver_tools_applet
 )
 
 ###
 # Add applet for config
-kwiver_add_plugin( tool_config_explorer
+kwiver_add_plugin( kwiver_tools
   SUBDIR       modules/applets
-  SOURCES      config_explorer.h
-               config_explorer.cxx
+  SOURCES      ${sources} ${headers}
   PRIVATE      vital
                vital_vpm
-               vital_config
+               #vital_config
                vital_logger
                kwiversys
-               kwiver_tools
+               kwiver_tools_applet
 )

@@ -29,7 +29,6 @@
  */
 
 #include "config_explorer.h"
-#include "tool_config_explorer_export.h"
 
 #include <vital/plugin_loader/plugin_manager.h>
 #include <vital/config/config_block_io.h>
@@ -235,31 +234,5 @@ run( int argc, const char* argv[] )
 
   return EXIT_SUCCESS;
 } // run
-
-
-// ============================================================================
-extern "C"
-TOOL_CONFIG_EXPLORER_EXPORT
-void
-register_factories( kwiver::vital::plugin_loader& vpm )
-{
-  static auto const module_name = kwiver::vital::plugin_manager::module_t( "kwiver_tool_config_explorer" );
-
-  if ( vpm.is_module_loaded( module_name ) )
-  {
-    return;
-  }
-
-  auto fact = vpm.ADD_APPLET( config_explorer );
-  fact->add_attribute( kwiver::vital::plugin_factory::PLUGIN_NAME, "config_explorer" )
-    .add_attribute( kwiver::vital::plugin_factory::PLUGIN_MODULE_NAME, module_name )
-    .add_attribute( kwiver::vital::plugin_factory::PLUGIN_CATEGORY, "applet" )
-    .add_attribute( kwiver::vital::plugin_factory::PLUGIN_DESCRIPTION,
-                    "Explore configuration loading process.\n\n"
-                    "This program assists in debugging config loading problems. It loads a "
-                    "configuration and displays the contents or displays the search path." )
-    .add_attribute( kwiver::vital::plugin_factory::PLUGIN_VERSION, "1.0" )
-    ;
-}
 
 } } // end namespace
