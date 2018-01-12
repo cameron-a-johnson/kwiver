@@ -170,15 +170,15 @@ run( int argc, const char* argv[] )
                                                     opt_app_version,
                                                     opt_install_prefix );
 
-    outstream() << "Application specific configuration search paths for\n"
-                << "       App name: " << opt_app_name << std::endl
-                << "    App version: " << opt_app_version << std::endl
-                << " Install Prefix: " << opt_install_prefix << std::endl
-                << std::endl;
+    std::cout << "Application specific configuration search paths for\n"
+              << "       App name: " << opt_app_name << std::endl
+              << "    App version: " << opt_app_version << std::endl
+              << " Install Prefix: " << opt_install_prefix << std::endl
+              << std::endl;
 
     for( auto path : search_path )
     {
-      outstream() << path << std::endl;
+      std::cout << path << std::endl;
     }
 
     return EXIT_SUCCESS;
@@ -188,10 +188,10 @@ run( int argc, const char* argv[] )
   // Read in config
   if( newArgc == 1 )
   {
-    outstream() << "Missing file name.\n"
-                << "Usage: " << newArgv[0] << "  config-file-name\n"
-                << "   " << newArgv[0] << " --help for usage details\n"
-                << std::endl;
+    std::cout << "Missing file name.\n"
+              << "Usage: " << newArgv[0] << "  config-file-name\n"
+              << "   " << newArgv[0] << " --help for usage details\n"
+              << std::endl;
 
     return EXIT_FAILURE;
   }
@@ -204,13 +204,13 @@ run( int argc, const char* argv[] )
 
   if ( ! opt_path.empty() )
   {
-    outstream() << "Using custom search path.\n";
+    std::cout << "Using custom search path.\n";
     config = kwiver::vital::read_config_file( config_file,
                                               opt_path );
   }
   else
   {
-    outstream() << "Using application default search path.\n";
+    std::cout << "Using application default search path.\n";
     config = kwiver::vital::read_config_file( config_file,
                                               opt_app_name,
                                               opt_app_version,
@@ -223,13 +223,13 @@ run( int argc, const char* argv[] )
   //
   if ( opt_detail_dc )
   {
-    outstream() << "Config contents for\n"
-                << "       App name: " << opt_app_name << std::endl
-                << "    App version: " << opt_app_version << std::endl
-                << " Install Prefix: " << opt_install_prefix << std::endl
-                << std::endl;
+    std::cout << "Config contents for\n"
+              << "       App name: " << opt_app_name << std::endl
+              << "    App version: " << opt_app_version << std::endl
+              << " Install Prefix: " << opt_install_prefix << std::endl
+              << std::endl;
 
-    kwiver::vital::write_config( config, outstream() );
+    kwiver::vital::write_config( config, std::cout );
   }
 
   return EXIT_SUCCESS;

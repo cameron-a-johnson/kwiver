@@ -34,6 +34,7 @@
 #include "kwiver_tools_export.h"
 
 #include <ostream>
+#include <memory>
 
 namespace kwiver {
 namespace tools {
@@ -58,19 +59,32 @@ public:
 protected:
 
   /**
-   * @brief Get reference to current output stream
+   * @brief Get applet name
    *
-   * This method returns the current output stream, that has been
-   * setup by the app_runner.
+   * This method returns the name of the applit as it was specified on
+   * the command line.
    *
-   * @return Current output stream.
+   * @return Applet name
    */
-  std::ostream& outstream() const;
   const std::string& applet_name() const;
+
+  /**
+   * @brief Wrap text block.
+   *
+   * This method wraps the supplied text into a fixed width text
+   * block.
+   *
+   * @param text Input text string to be wrapped.
+   *
+   * @return Text string wrapped into a block.
+   */
+  std::string wrap_text( const std::string& text );
 
 private:
   kwiver::tools::applet_context* m_context;
 };
+
+typedef std::shared_ptr<kwiver_applet> kwiver_applet_sptr;
 
 } } // end namespace
 

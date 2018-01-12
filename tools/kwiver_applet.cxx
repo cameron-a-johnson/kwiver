@@ -52,16 +52,16 @@ initialize( kwiver::tools::applet_context* ctxt)
 
 
 // ----------------------------------------------------------------------------
-std::ostream&
+std::string
 kwiver_applet::
-outstream() const
+wrap_text( const std::string& text )
 {
-  if ( m_context && m_context->m_ostream )
+  if ( m_context )
   {
-    return *m_context->m_ostream;
+    return m_context->m_wtb.wrap_text( text );
   }
 
-  throw std::runtime_error( "Invalid context or outstream" );
+  throw std::runtime_error( "Invalid context pointer" );
 }
 
 
@@ -76,7 +76,6 @@ applet_name() const
   }
 
   throw std::runtime_error( "Invalid context pointer" );
-
 }
 
 } } // end namespace kwiver

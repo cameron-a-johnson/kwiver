@@ -28,6 +28,11 @@ kwiver_add_library( kwiver_tools_applet
                kwiver_applet.cxx
 )
 
+target_link_libraries( kwiver_tools_applet
+              vital_util
+  )
+
+
 ###
 #
 kwiver_add_executable( kwiver

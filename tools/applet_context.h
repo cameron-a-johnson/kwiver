@@ -48,15 +48,13 @@ class applet_context
 {
 public:
 
-  // current output stream set by tool runner
-  std::shared_ptr<std::ostream> m_ostream;
-
   // Used to wrap large text blocks
   kwiver::vital::wrap_text_block m_wtb;
 
   // name of the applet. as in kwiver <applet> <args..>
   std::string m_applet_name;
-  }; // end class applet_context
+
+}; // end class applet_context
 
 } } // end namespace
 

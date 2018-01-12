@@ -56,8 +56,9 @@ public:
   command_line_parser( int p_argc, char *** p_argv )
     : m_argc(0)
     , m_argv(0)
-    , m_state(0)
   {
+    int state(0);
+
     // Parse the command line
     // Command line format:
     // arg0 [runner-flags] <applet> [applet-flags]
@@ -68,40 +69,21 @@ public:
     // Separate args into groups
     for (int i = 1; i < p_argc; ++i )
     {
-      if (m_state == 0)
+      if (state == 0)
       {
         // look for an option flag
         if ( (*p_argv)[i][0] == '-' )
         {
-          // There may be tokens associated with this option
-          switch ( (*p_argv)[i][1] )
-          {
-          case 'o':
-            if ( ++i < p_argc )
-            {
-              m_output_file = std::string( (*p_argv)[i] );
-            }
-            else
-            {
-              // error
-              std::cerr << "Missing file name for -o option" << std::endl;
-              exit (-1);
-            }
-            break;
-
-          default:
-            std::cerr << "Unrecognized program option: \"" << (*p_argv)[i] << "\"" << std::endl;
-            exit(-1);
-          } // end switch
+          m_runner_args.push_back( (*p_argv)[i] );
         }
         else
         {
           // found applet name
-          m_applet_name = std::string( (*p_argv)[i] ) ;
-          m_state = 1; // advance state
+          m_applet_name = std::string( (*p_argv)[i] );
+          state = 1; // advance state
         }
       }
-      else if (m_state == 1)
+      else if (state == 1)
       {
         // Collecting applet parameters
         m_applet_args.push_back( (*p_argv)[i] );
@@ -128,23 +110,13 @@ public:
   // tool runner arguments.
   std::string m_output_file; // empty is no file specified
 
+  std::vector<std::string> m_runner_args;
   std::vector<std::string> m_applet_args;
   std::string m_applet_name;
 
   int m_argc;
   const char** m_argv;
-
-private:
-  int m_state;
 };
-
-
-// ----------------------------------------------------------------------------
-void
-std_stream_dtor(void* /*ptr*/)
-{
-  // We don't want to delete std::cin or std::cout.
-}
 
 
 // ----------------------------------------------------------------------------
@@ -154,8 +126,7 @@ void tool_runner_usage( applet_context_t ctxt,
   // display help message
   std::cout << "Usage: kwiver  <applet>  [args]" << std::endl
             << "<applet> can be one of the following:" << std::endl
-            << "help - prints this message" << std::endl
-    ;
+            << "help - prints this message" << std::endl;
 
   // Get list of factories for implementations of the applet
   const auto fact_list = vpm.get_factories( typeid( kwiver::tools::kwiver_applet ).name() );
@@ -168,8 +139,37 @@ void tool_runner_usage( applet_context_t ctxt,
     std::cout << "    " << buf << " - ";
 
     fact->get_attribute( kwiver::vital::plugin_factory::PLUGIN_DESCRIPTION, buf );
+
+    // All we want is the first line of the description.
+    size_t pos = buf.find_first_of('\n');
+    if ( pos != 0 )
+    {
+      // Take all but the ending newline
+      buf = buf.substr( 0, pos-1 );
+    }
+
     std::cout << ctxt->m_wtb.wrap_text( buf );
   }
+}
+
+
+// ----------------------------------------------------------------------------
+void help_applet( const command_line_parser& options,
+                  applet_context_t tool_context,
+                  kwiver::vital::plugin_manager& vpm )
+{
+  if ( options.m_applet_args.size() < 2 )
+  {
+    tool_runner_usage( tool_context, vpm );
+    return;
+  }
+
+  // Create applet based on the name provided
+  applet_factory app_fact;
+  kwiver::tools::kwiver_applet_sptr applet(app_fact.create( options.m_applet_args[1] ) );
+  tool_context->m_applet_name = options.m_applet_args[1];
+  applet->initialize( tool_context.get() );
+  applet->usage( std::cout );
 }
 
 
@@ -187,43 +187,24 @@ int main(int argc, char *argv[])
 
 
   // initialize the global context
-  tool_context->m_ostream.reset( &std::cout, &std_stream_dtor );
   tool_context->m_wtb.set_indent_string( "      " );
 
   command_line_parser options( argc, &argv );
 
-  if ( options.m_applet_name.empty() || options.m_applet_name == "help" )
+  if ( options.m_applet_name == "help" )
   {
-    tool_runner_usage( tool_context, vpm );
+    help_applet( options, tool_context, vpm );
     return 0;
   } // end help code
-
-  // Process tool runner options
-  if ( ! options.m_output_file.empty() )
-  {
-    tool_context->m_ostream.reset( new std::ofstream( options.m_output_file ) );
-    if (! tool_context->m_ostream->good())
-    {
-      std::cerr <<  "Unable to open output file: " << options.m_output_file << std::endl;
-      return -1;
-    }
-  }
 
   // ----------------------------------------------------------------------------
   try
   {
     // Create applet based on the name provided
     applet_factory app_fact;
-    auto applet = app_fact.create( options.m_applet_name );
+    kwiver::tools::kwiver_applet_sptr applet( app_fact.create( options.m_applet_name ) );
     tool_context->m_applet_name = options.m_applet_name;
     applet->initialize( tool_context.get() );
-
-    // check for <applet> help
-    if ( options.m_applet_args[1] == "help" )
-    {
-      applet->usage( std::cout );
-      return 0;
-    }
 
     // Run the specified tool
     return applet->run( options.m_argc, options.m_argv );
