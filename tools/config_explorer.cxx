@@ -118,13 +118,13 @@ config_explorer()
 // ----------------------------------------------------------------------------
 int
 config_explorer::
-run( int argc, const char* argv[] )
+run( const std::vector<std::string>& argv )
 {
   opt_app_name = applet_name();
 
   kwiversys::CommandLineArguments arg;
 
-  arg.Initialize( argc, argv );
+  arg.Initialize( argv );
   arg.StoreUnusedArguments( true );
 
   arg.AddArgument( "-h",        argT::NO_ARGUMENT, &opt_help, "Display usage information" );

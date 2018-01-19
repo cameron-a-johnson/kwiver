@@ -35,6 +35,8 @@
 
 #include <ostream>
 #include <memory>
+#include <vector>
+#include <string>
 
 namespace kwiver {
 namespace tools {
@@ -53,7 +55,7 @@ public:
 
   void initialize( kwiver::tools::applet_context* ctxt);
 
-  virtual int run( int argc, const char* argv[] ) = 0;
+  virtual int run( const std::vector<std::string>& argv ) = 0;
   virtual void usage( std::ostream& outstream ) const = 0;
 
 protected:

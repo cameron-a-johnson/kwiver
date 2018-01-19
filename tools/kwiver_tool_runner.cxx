@@ -54,8 +54,6 @@ class command_line_parser
 {
 public:
   command_line_parser( int p_argc, char *** p_argv )
-    : m_argc(0)
-    , m_argv(0)
   {
     int state(0);
 
@@ -90,32 +88,15 @@ public:
       }
     } // end for
 
-    // -----------
-    // create standard parameters for applet
-    m_argc = m_applet_args.size();
-    m_argv = static_cast< const char** >(calloc( sizeof(char*), m_argc+1 ) );
-
-    for (int i = 0; i < m_argc; i++)
-    {
-      m_argv[i] = m_applet_args[i].c_str();
-    }
   }
 
-  // ----------------------------------
-  ~command_line_parser()
-  {
-    free (m_argv);
-  }
-
+  // ----------------------
   // tool runner arguments.
   std::string m_output_file; // empty is no file specified
 
   std::vector<std::string> m_runner_args;
   std::vector<std::string> m_applet_args;
   std::string m_applet_name;
-
-  int m_argc;
-  const char** m_argv;
 };
 
 
@@ -207,7 +188,7 @@ int main(int argc, char *argv[])
     applet->initialize( tool_context.get() );
 
     // Run the specified tool
-    return applet->run( options.m_argc, options.m_argv );
+    return applet->run( options.m_applet_args );
   }
   catch ( kwiver::vital::plugin_factory_not_found& )
   {
