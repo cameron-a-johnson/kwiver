@@ -186,7 +186,7 @@ run( const std::vector<std::string>& argv )
 
 
   // Read in config
-  if( newArgc == 1 )
+  if( newArgc <= 1 )
   {
     std::cout << "Missing file name.\n"
               << "Usage: " << newArgv[0] << "  config-file-name\n"
