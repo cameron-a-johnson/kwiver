@@ -94,8 +94,29 @@ public:
    */
   void load_pipeline( kwiver::vital::path_t const& def_file );
 
-  //+ add docs
+  /**
+   * \brief Load cluster from stream.
+   *
+   * This method loads the cluster into the builder. This can be used
+   * to add additional configuration files to the internal pipeline
+   * representation.
+   *
+   * \param istr Stream containing the textual cluster definition.
+   * \param def_file The default file name used when reporting errors
+   * from the stream. The directory portion is used when resolving
+   * included files and relpath specifiers.
+   */
   void load_cluster( std::istream& istr, kwiver::vital::path_t const& def_file = "" );
+
+  /**
+   * \brief Load cluster from file name.
+   *
+   * This method loads the cluster into the builder. This can be used
+   * to add additional configuration files to the internal pipeline
+   * representation.
+   *
+   * \param def_file The name of the cluster file to use.
+   */
   void load_cluster( kwiver::vital::path_t const& def_file );
 
   /**
