@@ -44,10 +44,8 @@
 #include <exception>
 #include <memory>
 
-
-typedef kwiver::vital::implementation_factory_by_name< kwiver::tools::kwiver_applet > applet_factory;
-typedef std::shared_ptr< kwiver::tools::applet_context > applet_context_t;
-
+using applet_factory = kwiver::vital::implementation_factory_by_name< kwiver::tools::kwiver_applet >;
+using applet_context_t = std::shared_ptr< kwiver::tools::applet_context >;
 
 // ============================================================================
 class command_line_parser
@@ -147,7 +145,7 @@ void help_applet( const command_line_parser& options,
 
   // Create applet based on the name provided
   applet_factory app_fact;
-  kwiver::tools::kwiver_applet_sptr applet(app_fact.create( options.m_applet_args[1] ) );
+  kwiver::tools::kwiver_applet_sptr applet( app_fact.create( options.m_applet_args[1] ) );
   tool_context->m_applet_name = options.m_applet_args[1];
   applet->initialize( tool_context.get() );
   applet->usage( std::cout );
@@ -197,9 +195,9 @@ int main(int argc, char *argv[])
 
     exit(-1);
   }
-  catch ( kwiver::vital::vital_core_base_exception& e )
+  catch ( kwiver::vital::vital_exception& e )
   {
-    std::cerr << "Caught unhandled kwiver::vital::vital_core_base_exception: " << e.what() << std::endl;
+    std::cerr << "Caught unhandled kwiver::vital::vital_exception: " << e.what() << std::endl;
     exit( -1 );
   }
   catch ( std::exception& e )
