@@ -51,7 +51,7 @@ class KWIVER_TOOLS_EXPORT kwiver_applet
 {
 public:
   kwiver_applet();
-  virtual ~kwiver_applet() = default;
+  virtual ~kwiver_applet();
 
   void initialize( kwiver::tools::applet_context* ctxt);
 

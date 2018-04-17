@@ -42,6 +42,12 @@ kwiver_applet()
 }
 
 
+kwiver_applet::
+~kwiver_applet()
+{
+}
+
+
 // ----------------------------------------------------------------------------
 void
 kwiver_applet::
