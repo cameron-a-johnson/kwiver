@@ -68,11 +68,6 @@ public:
 
     // Returns the whole pipeline config
     virtual kwiver::vital::config_block_sptr pipe_config() = 0;
-
-    virtual bool cancelled() const = 0;
-
-  protected:
-    context();
   };
 
 
@@ -87,7 +82,17 @@ public:
    *
    * @param ctxt The calling context.
    */
-  virtual void pre_setup( context& ctxt ) = 0;
+  virtual void pre_setup( context& ctxt ) { };
+
+  /**
+   * @brief pipeline post-setup hook
+   *
+   * This method is called after the pipeline is setup. A context
+   * object is supplied to this hook so it can query its running environment.
+   *
+   * @param ctxt The calling context.
+   */
+  virtual void post_setup( context& ctxt ) { };
 
   /**
    * @brief End of data received from pipeline.
@@ -99,7 +104,7 @@ public:
    *
    * @param ctxt The calling context
    */
-  virtual void end_of_output( context& ctxt ) = 0;
+  virtual void end_of_output( context& ctxt ) { };
 
   // Add other hooks as needed.
 

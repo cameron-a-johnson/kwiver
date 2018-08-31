@@ -284,7 +284,7 @@ public:
   virtual ~src_ep() { }
 
 protected:
-  virtual bool connect_input_adapter() { return true; }
+  virtual bool connect_input_adapter() override { return true; }
 };
 
 
@@ -344,7 +344,7 @@ public:
   virtual ~config_ep() { }
 
 protected:
-  virtual void update_config( kwiver::vital::config_block_sptr config )
+  virtual void update_config( kwiver::vital::config_block_sptr config ) override
   {
     // Test to see if the config has test = value
     TEST_EQUAL( "Has expected entry", config->has_value( "ia:test" ), true );

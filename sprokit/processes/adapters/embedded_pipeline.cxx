@@ -61,9 +61,6 @@ namespace {
 
 using plugin_factory =  kwiver::vital::implementation_factory_by_name< kwiver::embedded_pipeline_extension >;
 
-static kwiver::vital::config_block_key_t const extension_type_key =
-  kwiver::vital::config_block_key_t("_embedded_pipeline_extension");
-
 static kwiver::vital::config_block_key_t const scheduler_block = kwiver::vital::config_block_key_t("_scheduler");
 static kwiver::vital::config_block_key_t const epx_block_key = kwiver::vital::config_block_key_t("_pipeline:embedded_pipeline_extension");
 
@@ -83,7 +80,6 @@ public:
     : m_logger( kwiver::vital::get_logger( "sprokit.embedded_pipeline" ))
     , m_at_end( false )
     , m_stop_flag( false )
-    , m_pipeline_state( EPS_pre_build )
     , m_input_adapter_connected( false )
     , m_output_adapter_connected (false )
   { }
@@ -94,7 +90,7 @@ public:
     // If the pipeline has been started, wait until it has completed
     // before freeing storage. May have to do more here to deal with a
     // still-running pipeline.
-    if ( m_pipeline_state == EPS_running )
+    if ( ! m_stop_flag )
     {
       try
       {
@@ -111,14 +107,6 @@ public:
   vital::logger_handle_t m_logger;
   bool m_at_end;
   bool m_stop_flag;
-  enum {
-    EPS_pre_build,
-    EPS_building,
-    EPS_built,
-    EPS_running,
-    EPS_stopped
-  } m_pipeline_state;
-
   bool m_input_adapter_connected;
   bool m_output_adapter_connected;
 
@@ -148,12 +136,11 @@ class real_context
 {
 public:
   real_context( std::shared_ptr< embedded_pipeline::priv> p );
-  virtual ~real_context();
+  virtual ~real_context() = default;
 
-  virtual sprokit::pipeline_t pipeline() { return m_priv->m_pipeline; }
-  virtual vital::logger_handle_t logger() { return m_priv->m_logger; }
-  virtual kwiver::vital::config_block_sptr pipe_config() { return m_priv->m_pipe_config; }
-  virtual bool cancelled() const { return m_priv->m_stop_flag; }
+  virtual sprokit::pipeline_t pipeline() override { return m_priv->m_pipeline; }
+  virtual vital::logger_handle_t logger() override { return m_priv->m_logger; }
+  virtual kwiver::vital::config_block_sptr pipe_config() override { return m_priv->m_pipe_config; }
 
   // add other context items as needed.
 
@@ -166,10 +153,6 @@ real_context::
 real_context( std::shared_ptr< embedded_pipeline::priv> p )
   : m_priv(p)
 { }
-
-real_context::
-~real_context() { }
-
 
 
 
@@ -197,8 +180,6 @@ void
 embedded_pipeline
 ::build_pipeline( std::istream& istr, std::string const& def_dir )
 {
-  m_priv->m_pipeline_state = priv::EPS_building;
-
   // create a pipeline
   sprokit::pipeline_builder builder;
 
@@ -243,9 +224,7 @@ embedded_pipeline
     }
   }
 
-  // check config for _pipeline:embedded_pipeline:pre_setup:type = <foo>
-  // If present, instantiate and configure it.
-  // Plugin interface type embedded_pipeline_hooks
+
   if ( m_priv->m_hooks )
   {
     m_priv->m_hooks->pre_setup( *m_priv->m_context );
@@ -255,7 +234,6 @@ embedded_pipeline
   // This throws many exceptions
   try
   {
-    // This may pause due to resource allocation issues.
     m_priv->m_pipeline->setup_pipeline();
   }
   catch( sprokit::pipeline_exception const& e)
@@ -263,6 +241,11 @@ embedded_pipeline
     std::stringstream str;
     str << "Error setting up pipeline: " << e.what();
     throw std::runtime_error( str.str() );
+  }
+
+  if ( m_priv->m_hooks )
+  {
+    m_priv->m_hooks->post_setup( *m_priv->m_context );
   }
 
   // check if pipeline is ready
@@ -298,9 +281,6 @@ embedded_pipeline
   {
     throw std::runtime_error( "Unable to create scheduler" );
   }
-
-  // Indicate that the pipeline has been built.
-  m_priv->m_pipeline_state = priv::EPS_built;
 }
 
 
@@ -409,7 +389,6 @@ void
 embedded_pipeline
 ::start()
 {
-  m_priv->m_pipeline_state = priv::EPS_running;
   m_priv->m_scheduler->start();
 }
 
@@ -420,7 +399,6 @@ embedded_pipeline
 ::wait()
 {
   m_priv->m_scheduler->wait();
-  m_priv->m_pipeline_state = priv::EPS_stopped;
 }
 
 
@@ -433,14 +411,10 @@ embedded_pipeline
 
   // Note: Can throws stop_before_start_exception Thrown when the
   // scheduler has not been started
-  // May need to flush the bounded buffers too. Likely pipeline may
-  // want to be restarted.
   m_priv->m_scheduler->stop();
 
   // Wait for scheduler to terminate.
   m_priv->m_scheduler->wait();
-
-  m_priv->m_pipeline_state = priv::EPS_stopped;
 }
 
 
