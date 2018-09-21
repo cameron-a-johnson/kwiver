@@ -1,5 +1,5 @@
 /*ckwg +29
- * Copyright 2017 by Kitware, Inc.
+ * Copyright 2018 by Kitware, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,10 @@
 #ifndef VITAL_IMAGE_CONTAINER_SET_H_
 #define VITAL_IMAGE_CONTAINER_SET_H_
 
-
 #include "image_container.h"
-#include <vital/vital_config.h>
-#include <vital/iterator.h>
+
+#include <vital/vital_export.h>
+#include <vital/set.h>
 #include <vital/logger/logger.h>
 #include <vital/noncopyable.h>
 
@@ -54,15 +54,12 @@ namespace vital {
  * derived classes can store the data in other formats and convert on demand.
  */
 class image_container_set
-  : public iterable< image_container_sptr >
+  : public set< image_container_sptr >
   , private noncopyable
 {
 public:
   /// Destructor
   virtual ~image_container_set() = default;
-
-  /// Return the number of images in the set
-  virtual size_t size() const = 0;
 
 protected:
   image_container_set()
@@ -75,6 +72,36 @@ protected:
 /// Shared pointer for base image_container_set type
 typedef std::shared_ptr< image_container_set > image_container_set_sptr;
 
+// ----------------------------------------------------------------------------
+/// A concrete image container set that simply wraps a vector of images.
+class VITAL_EXPORT simple_image_container_set
+  : public image_container_set
+{
+public:
+  // Default Constructor
+  simple_image_container_set();
+
+  // Constructor from a vector of images
+  explicit simple_image_container_set( std::vector< image_container_sptr > const& images );
+
+  // set API methods
+  virtual size_t size() const;
+  virtual bool empty() const;
+  virtual image_container_sptr at( size_t index );
+  virtual image_container_sptr const at( size_t index ) const;
+
+protected:
+  using vec_t = std::vector< image_container_sptr >;
+
+  /// The vector of images
+  vec_t data_;
+
+  /// Implement next function for non-const iterator.
+  iterator::next_value_func_t get_iter_next_func();
+
+  /// Implement next function for const iterator.
+  const_iterator::next_value_func_t get_const_iter_next_func() const;
+};
 
 } } // end namespace vital
 

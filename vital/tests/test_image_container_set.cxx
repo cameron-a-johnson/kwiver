@@ -31,7 +31,7 @@
 #include <gtest/gtest.h>
 
 #include <vital/types/image.h>
-#include <vital/types/image_container_set_simple.h>
+#include <vital/types/image_container_set.h>
 
 
 namespace {

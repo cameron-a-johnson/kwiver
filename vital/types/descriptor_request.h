@@ -1,5 +1,5 @@
 /*ckwg +29
- * Copyright 2017 by Kitware, Inc.
+ * Copyright 2017-2018 by Kitware, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ namespace vital {
 ///
 /// This is used by some arbitrary GUI to request and return computed
 /// descriptors on some region of the input imagery.
-class descriptor_request
+class VITAL_EXPORT descriptor_request
 {
 public:
 
